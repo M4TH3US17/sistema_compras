@@ -1,8 +1,8 @@
-package services;
+package model.services;
 
 import java.util.List;
 
-import entities.Product;
+import model.entities.Product;
 
 public class PaymentService implements Payment {
 

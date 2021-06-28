@@ -1,4 +1,4 @@
-package services;
+package model.services;
 
 public class OrderService {
 

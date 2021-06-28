@@ -13,12 +13,12 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import db.DB;
-import entities.Account;
-import entities.Employee;
-import entities.Order;
-import entities.Product;
-import services.OrderService;
-import services.PaymentService;
+import model.entities.Account;
+import model.entities.Employee;
+import model.entities.Order;
+import model.entities.Product;
+import model.services.OrderService;
+import model.services.PaymentService;
 
 public class Program {
 

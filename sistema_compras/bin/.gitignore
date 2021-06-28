@@ -1,4 +1,3 @@
 /application/
-/db/
-/entities/
+/model/
 /services/
