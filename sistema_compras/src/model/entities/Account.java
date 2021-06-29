@@ -69,12 +69,8 @@ public class Account {
 		}
 	}
 
-	public static String authentication (List<Employee> employee, String email, String password) {
-		try {
-			if(employee.get(0).getAccount().getEmail().equalsIgnoreCase(email) && employee.get(0).getAccount().getPassword().equalsIgnoreCase(password));
-		} catch(IndexOutOfBoundsException e) {
-			System.err.println("Email ou senha inexistentes!");
-		}
-		return "-> Funcionário: " + employee.get(0).getName()+", Cargo: " + employee.get(0).getCargo();
+	@Override
+	public String toString() {
+		return "Account [email=" + email + ", password=" + password + "]";
 	} 
 }

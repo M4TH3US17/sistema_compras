@@ -58,7 +58,7 @@ public class DB {
 	}
 
 	private static Properties loadProperties() {
-		try(FileInputStream fs = new FileInputStream("/home/matheus/eclipse-workspace/sistema_compras/db.properties")){
+		try(FileInputStream fs = new FileInputStream("db.properties")){
 			Properties props = new Properties();
 			props.load(fs);
 			return props;

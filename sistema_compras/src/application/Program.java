@@ -13,6 +13,8 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import db.DB;
+import model.dao.DaoFactory;
+import model.dao.EmployeeDao;
 import model.entities.Account;
 import model.entities.Employee;
 import model.entities.Order;
@@ -45,7 +47,7 @@ public class Program {
 		int op, count;
 		List<Employee> employees = new ArrayList<>();
 		List<Product> products = new ArrayList<>();
-
+		
 		try {
 			conn = DB.getConnection();
 			st = conn.createStatement();
@@ -66,15 +68,17 @@ public class Program {
 			email = scan.nextLine();
 			System.out.print("Senha: ");
 			password = scan.nextLine();
-			List<Employee> filter_users = employees.stream()
-					.filter(x -> x.getAccount().getEmail().equalsIgnoreCase(email) && x.getAccount().getPassword().equalsIgnoreCase(password))
-					.collect(Collectors.toList());
-			String recorte = Account.authentication(filter_users, email, password);
-
+			
+			EmployeeDao employeee = DaoFactory.createEmployeeDao();
+			Employee emploue = employeee.findByAccount(email, password);
+			
+			if(emploue == null) {
+				throw new NullPointerException("Email ou senha inexistente!");
+			}
+			
 			System.err.println("\n### TELA INICIAL ###");
-			String[] fields = recorte.split("Cargo: ");
-			if(fields[1].equalsIgnoreCase("gerente")) {
-				System.out.println(recorte);
+			if(emploue.getCargo().equalsIgnoreCase("gerente")) {
+				System.out.println("FUNCIONÁRIO: " + emploue.getName()+". CARGO: " + emploue.getCargo());
 				System.out.println("\n[1] TABELA DE PREÇOS;");
 				System.out.println("[2] ADICIONAR PRODUTO;");
 				System.out.println("[3] DELETAR PRODUTO;");
@@ -210,8 +214,8 @@ public class Program {
 					break;
 				}
 
-			} else if (fields[1].equalsIgnoreCase("atendente")) {
-				System.out.println(recorte);
+			} else if (emploue.getCargo().equalsIgnoreCase("atendente")) {
+				System.out.println("FUNCIONÁRIO: " + emploue.getName()+". CARGO: " + emploue.getCargo());
 				System.out.println("\n[1] TABELA DE PREÇOS;");
 				System.out.println("[2] ADICIONAR COMPRA;");
 				System.out.print("\nOpção (Digite): ");
@@ -281,7 +285,8 @@ public class Program {
 		catch(SQLException e) {
 			System.err.println("Erro no Banco de Dados!");
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch(NullPointerException e) {
+			System.err.println(e.getMessage());
 		}
 		finally {
 			DB.closeStatement(st);

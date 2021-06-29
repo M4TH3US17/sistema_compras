@@ -12,8 +12,9 @@ public class Employee {
 	private Integer ID;
 	private String name;
 	private Double salary;
-	private Account account;
 	private String cargo;
+	
+	private Account account;
 	
 	public Employee() {
 	}
@@ -111,5 +112,11 @@ public class Employee {
 			total += emp.getSalary();
 		}
 		return total;
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [ID=" + ID + ", name=" + name + ", salary=" + salary + ", cargo=" + cargo + ", account="
+				+ account + "]";
 	}
 }
