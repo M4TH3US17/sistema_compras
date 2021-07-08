@@ -43,21 +43,13 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 		PreparedStatement st = null;
 		try {
 			st = conn.prepareStatement(
-					"SELECT * FROM EMPLOYEE WHERE EMAIL = ? AND SENHA = ?;"
-					);
+					"SELECT * FROM EMPLOYEE WHERE EMAIL = ? AND SENHA = ?;");
 			st.setString(1, email);
 			st.setString(2, password);
 			rs = st.executeQuery();
 			if(rs.next()) {
-				Employee emp = new Employee();
-				emp.setName(rs.getString("NOME"));
-				emp.setID(rs.getInt("ID"));
-				emp.setCargo(rs.getString("CARGO"));
-				emp.setSalary(rs.getDouble("SALARY"));
-				Account account = new Account();
-				account.setEmail(rs.getString("EMAIL"));
-				account.setPassword(rs.getString("SENHA"));
-				emp.setAccount(account);
+				Account account = instantiateAccount(rs);
+				Employee emp = instantiateEmployee(rs, account);
 				return emp;
 			}
 			return null;
@@ -68,6 +60,23 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 		finally {
 			
 		}
+	}
+
+	private Account instantiateAccount(ResultSet rs) throws SQLException {
+		Account account = new Account();
+		account.setEmail(rs.getString("EMAIL"));
+		account.setPassword(rs.getString("SENHA"));
+		return account;
+	}
+
+	private Employee instantiateEmployee(ResultSet rs, Account account) throws SQLException {
+		Employee emp = new Employee();
+		emp.setName(rs.getString("NOME"));
+		emp.setID(rs.getInt("ID"));
+		emp.setCargo(rs.getString("CARGO"));
+		emp.setSalary(rs.getDouble("SALARY"));
+		emp.setAccount(account);
+		return emp;
 	}
 
 	@Override

@@ -69,16 +69,16 @@ public class Program {
 			System.out.print("Senha: ");
 			password = scan.nextLine();
 			
-			EmployeeDao employeee = DaoFactory.createEmployeeDao();
-			Employee emploue = employeee.findByAccount(email, password);
+			EmployeeDao employeeDao = DaoFactory.createEmployeeDao();
+			Employee employee_ = employeeDao.findByAccount(email, password);
 			
-			if(emploue == null) {
+			if(employee_ == null) {
 				throw new NullPointerException("Email ou senha inexistente!");
 			}
 			
 			System.err.println("\n### TELA INICIAL ###");
-			if(emploue.getCargo().equalsIgnoreCase("gerente")) {
-				System.out.println("FUNCIONÁRIO: " + emploue.getName()+". CARGO: " + emploue.getCargo());
+			if(employee_.getCargo().equalsIgnoreCase("gerente")) {
+				System.out.println("FUNCIONÁRIO: " + employee_.getName()+". CARGO: " + employee_.getCargo());
 				System.out.println("\n[1] TABELA DE PREÇOS;");
 				System.out.println("[2] ADICIONAR PRODUTO;");
 				System.out.println("[3] DELETAR PRODUTO;");
@@ -214,8 +214,8 @@ public class Program {
 					break;
 				}
 
-			} else if (emploue.getCargo().equalsIgnoreCase("atendente")) {
-				System.out.println("FUNCIONÁRIO: " + emploue.getName()+". CARGO: " + emploue.getCargo());
+			} else if (employee_.getCargo().equalsIgnoreCase("atendente")) {
+				System.out.println("FUNCIONÁRIO: " + employee_.getName()+". CARGO: " + employee_.getCargo());
 				System.out.println("\n[1] TABELA DE PREÇOS;");
 				System.out.println("[2] ADICIONAR COMPRA;");
 				System.out.print("\nOpção (Digite): ");
