@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
+import db.DB;
 import db.DbException;
 import model.dao.EmployeeDao;
 import model.entities.Account;
@@ -58,7 +60,8 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 			throw new DbException(e.getMessage());
 		}
 		finally {
-			
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
 		}
 	}
 
@@ -81,8 +84,26 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 
 	@Override
 	public List<Employee> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement("SELECT * FROM EMPLOYEE;");
+			rs = st.executeQuery();
+			List<Employee> employee = new ArrayList<>();
+			
+			while(rs.next()) {
+				Account obj1 = instantiateAccount(rs);
+				Employee obj2 = instantiateEmployee(rs, obj1);
+				employee.add(obj2);
+			}
+			return employee;
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
-
 }

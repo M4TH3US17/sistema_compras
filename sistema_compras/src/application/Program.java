@@ -1,9 +1,5 @@
 package application;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.InputMismatchException;
@@ -29,35 +25,21 @@ public class Program {
 
 		Locale.setDefault(Locale.US);
 		Scanner scan = new Scanner(System.in);
-
-		Connection conn = null;
-		Statement st = null;
-		ResultSet rs = null;
-
-		String email, password, emp, cargo, name, type;
-		double salary, value, price;
-		int op, count;
 		
+		System.err.println("### ACESSAR CONTA ###");
 		EmployeeDao employeeDao = DaoFactory.createEmployeeDao();
-		List<Employee> employees = new ArrayList<>();
+		List<Employee> employees = employeeDao.findAll();
 		ProductDao productDao = DaoFactory.createProductDao();
 		List<Product> products = productDao.findAll();
 		
+		int op;
+		double value;
+				
 		try {
-			conn = DB.getConnection();
-			st = conn.createStatement();
-			rs = st.executeQuery("SELECT * FROM EMPLOYEE;");
-
-			while(rs.next()) {
-				employees.add(new Employee(rs.getInt("ID"),rs.getString("NOME"), new Account(rs.getString("EMAIL"), rs.getString("SENHA")),
-						rs.getDouble("SALARY"), rs.getString("CARGO")));
-			}
-
-			System.err.println("### ACESSAR CONTA ###");
-			System.out.print("\nEmail: ");
-			email = scan.nextLine();
+			System.out.print("Email: ");
+			String email = scan.nextLine();
 			System.out.print("Senha: ");
-			password = scan.nextLine();
+			String password = scan.nextLine();
 			
 			Employee employee_ = employeeDao.findByAccount(email, password);
 			
@@ -84,12 +66,12 @@ public class Program {
 					break;
 				case 2:
 					System.out.print("Produto: ");
-					name = scan.nextLine();
+					String name = scan.nextLine();
 					System.out.print("Preço: ");
-					price = scan.nextDouble();
+					Double price = scan.nextDouble();
 					scan.nextLine();
 					System.out.print("Tipo (bebida/comida/fruta): ");
-					type = scan.nextLine();
+					String type = scan.nextLine();
 					productDao.addProduct(name, price, type);
 					break;
 				case 3: 
@@ -145,24 +127,24 @@ public class Program {
 					if (op == 1) {
 						System.err.println("-> CRIAR CONTA ");
 						System.out.print("\nFuncionário: ");
-						emp = scan.nextLine();
+						String emp = scan.nextLine();
 						System.out.print("Email: ");
 						String email_ = scan.nextLine();
 						System.out.print("Senha: ");					
 						String password_ = scan.nextLine();
 						System.out.print("Salário: ");
-						salary = scan.nextDouble();
+						Double salary = scan.nextDouble();
 						scan.nextLine();
 						System.out.print("Cargo: ");
-						cargo = scan.nextLine();
+						String cargo = scan.nextLine();
 
 						Account.createAccount(employees, email_, password_, emp, salary, cargo);
 					} else if(op == 2) {
 						System.err.println("-> ATUALIZAR SALÁRIO ");
 						System.out.print("\nFuncionário: ");
-						emp = scan.nextLine();
+						String emp = scan.nextLine();
 						System.out.print("Salário: ");
-						salary = scan.nextDouble();
+						Double salary = scan.nextDouble();
 
 						List<Employee> emp2 = employees.stream()
 								.filter(x -> x.getName().equalsIgnoreCase(emp))
@@ -173,7 +155,7 @@ public class Program {
 					} else if(op == 3) {
 						System.err.println("-> DELETAR FUNCIONÁRIO ");
 						System.out.print("\nFuncionário: ");
-						emp = scan.nextLine();
+						String emp = scan.nextLine();
 						
 						List<Employee> emp2 = employees.stream()
 								.filter(x -> x.getName().equalsIgnoreCase(emp))
@@ -219,7 +201,7 @@ public class Program {
 				case 2:
 					System.err.println("\n### ADICIONAR COMPRA ###");
 					List<Product> shopping = new ArrayList<>();
-					count = 1;
+					int count = 1;
 
 					for(int i = 0;i < count;i++) {
 						System.out.print("\nProduto: ");
@@ -249,7 +231,7 @@ public class Program {
 					do {
 						System.out.println("\nTotal: R$ " + String.format("%.2f", PaymentService.totalPayment(shopping)));
 						System.out.print("Valor: ");
-						value = scan.nextDouble();
+					    value = scan.nextDouble();
 
 						if(PaymentService.totalPayment(shopping) > value) {
 							System.err.println("Valor baixo!\n");
@@ -271,15 +253,10 @@ public class Program {
 		catch (InputMismatchException e) {
 			System.err.println("Digite apenas números inteiros!");
 		}
-		catch(SQLException e) {
-			System.err.println("Erro no Banco de Dados!");
-		}
 		catch(NullPointerException e) {
 			System.err.println(e.getMessage());
 		}
 		finally {
-			DB.closeStatement(st);
-			DB.closeResultSet(rs);
 			DB.closeConnection();
 			scan.close();
 		}
