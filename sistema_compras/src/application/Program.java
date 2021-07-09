@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import db.DB;
 import model.dao.DaoFactory;
 import model.dao.EmployeeDao;
+import model.dao.ProductDao;
 import model.entities.Account;
 import model.entities.Employee;
 import model.entities.Order;
@@ -24,14 +25,6 @@ import model.services.PaymentService;
 
 public class Program {
 
-	public static Double totalPayment(List<Product> products) {
-		Double sum = 0.0;
-		for(Product p: products) {
-			sum += (p.getPrice() * p.getQuantity());
-		}
-		return sum;
-	}
-
 	public static void main(String[] args) {
 
 		Locale.setDefault(Locale.US);
@@ -40,13 +33,15 @@ public class Program {
 		Connection conn = null;
 		Statement st = null;
 		ResultSet rs = null;
-		ResultSet rs_ = null;
 
 		String email, password, emp, cargo, name, type;
 		double salary, value, price;
 		int op, count;
+		
+		EmployeeDao employeeDao = DaoFactory.createEmployeeDao();
 		List<Employee> employees = new ArrayList<>();
-		List<Product> products = new ArrayList<>();
+		ProductDao productDao = DaoFactory.createProductDao();
+		List<Product> products = productDao.findAll();
 		
 		try {
 			conn = DB.getConnection();
@@ -57,11 +52,6 @@ public class Program {
 				employees.add(new Employee(rs.getInt("ID"),rs.getString("NOME"), new Account(rs.getString("EMAIL"), rs.getString("SENHA")),
 						rs.getDouble("SALARY"), rs.getString("CARGO")));
 			}
-			rs_ = st.executeQuery("SELECT * FROM PRODUCT;");
-			while(rs_.next()) {
-				products.add(new Product(rs_.getInt("ID"), rs_.getString("NOME"), 
-						rs_.getDouble("PRICE"), rs_.getString("TYPE"), null));
-			}
 
 			System.err.println("### ACESSAR CONTA ###");
 			System.out.print("\nEmail: ");
@@ -69,7 +59,6 @@ public class Program {
 			System.out.print("Senha: ");
 			password = scan.nextLine();
 			
-			EmployeeDao employeeDao = DaoFactory.createEmployeeDao();
 			Employee employee_ = employeeDao.findByAccount(email, password);
 			
 			if(employee_ == null) {
@@ -101,7 +90,7 @@ public class Program {
 					scan.nextLine();
 					System.out.print("Tipo (bebida/comida/fruta): ");
 					type = scan.nextLine();
-					Product.addProduct(name, price, type);
+					productDao.addProduct(name, price, type);
 					break;
 				case 3: 
 					System.out.print("Produto a ser deletado: ");
@@ -109,7 +98,7 @@ public class Program {
 					List<Product> p1 = products.stream().
 							filter(x -> x.getName().equalsIgnoreCase(name_)).
 							collect(Collectors.toList());
-					Product.deleteProduct(p1.get(0).getID());
+					productDao.deleteById(p1.get(0).getID());
 					break;
 				case 4:
 					System.err.println("\n### ALTERAR PRODUTO ###");
@@ -128,7 +117,7 @@ public class Program {
 						List<Product> p2 = products.stream().
 								filter(x -> x.getName().equalsIgnoreCase(oldName)).
 								collect(Collectors.toList());
-						Product.updateNameProduct(p2.get(0).getID(), newName);
+						productDao.updateNameProduct(p2.get(0).getID(), newName);
 					} else if (op == 2) {
 						System.out.print("Produto a ser alterado: ");
 						String nameUpdate = scan.nextLine();
@@ -137,7 +126,7 @@ public class Program {
 						List<Product> p2 = products.stream().
 								filter(x -> x.getName().equalsIgnoreCase(nameUpdate)).
 								collect(Collectors.toList());
-						Product.updatePriceProduct(p2.get(0).getID(), newPrice);
+						productDao.updatePriceProduct(p2.get(0).getID(), newPrice);
 					} else {
 						System.err.println("Opção inválida!");
 					}
@@ -258,14 +247,14 @@ public class Program {
 						scan.nextLine();
 					}
 					do {
-						System.out.println("\nTotal: R$ " + String.format("%.2f", Program.totalPayment(shopping)));
+						System.out.println("\nTotal: R$ " + String.format("%.2f", PaymentService.totalPayment(shopping)));
 						System.out.print("Valor: ");
 						value = scan.nextDouble();
 
-						if(Program.totalPayment(shopping) > value) {
+						if(PaymentService.totalPayment(shopping) > value) {
 							System.err.println("Valor baixo!\n");
 						}
-					} while(Program.totalPayment(shopping) > value);
+					} while(PaymentService.totalPayment(shopping) > value);
 
 					PaymentService payment = new PaymentService(shopping, value);
 					Order order = new Order(shopping, new Date(), new OrderService(payment));
@@ -291,7 +280,6 @@ public class Program {
 		finally {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
-			DB.closeResultSet(rs_);
 			DB.closeConnection();
 			scan.close();
 		}

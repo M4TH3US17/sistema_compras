@@ -74,5 +74,12 @@ public class PaymentService implements Payment {
 		}
 	}
 	
+	public static Double totalPayment(List<Product> products) {
+		Double sum = 0.0;
+		for(Product p: products) {
+			sum += (p.getPrice() * p.getQuantity());
+		}
+		return sum;
+	}
 	
 }

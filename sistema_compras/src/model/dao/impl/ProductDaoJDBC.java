@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import db.DB;
@@ -20,21 +21,22 @@ public class ProductDaoJDBC implements ProductDao {
 	}
 	
 	@Override
-	public void insert(Product obj) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void update(Product obj) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement(
+					"DELETE FROM PRODUCT WHERE ID = ?;");
+			st.setInt(1, id);
+			st.executeUpdate();
+			System.out.println("PRODUTO DELETADO!");
+		}
+		catch(SQLException e) {
+			throw new DbException("Error update!");
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
 	}
 
 	@Override
@@ -66,13 +68,86 @@ public class ProductDaoJDBC implements ProductDao {
 		obj.setName(rs.getString("NOME"));
 		obj.setPrice(rs.getDouble("PRICE"));
 		obj.setType(rs.getString("TYPE"));
+		obj.setQuantity(null);
 		return obj;
 	}
 
 	@Override
 	public List<Product> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement("SELECT * FROM PRODUCT;");
+			rs = st.executeQuery();
+			List<Product> products = new ArrayList<>();
+			while(rs.next()) {
+				Product obj = instantiateProduct(rs);
+				products.add(obj);
+			}
+			return products;
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
+	}
+
+	@Override
+	public void addProduct(String name, Double price, String type) {
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("INSERT INTO PRODUCT (NOME, PRICE, TYPE) VALUES (?, ?, ?);");
+			st.setString(1, name);
+			st.setDouble(2, price);
+			st.setString(3, type);
+			st.executeUpdate();
+		}
+		catch(SQLException e) {
+		}
+		finally {
+			DB.closeStatement(st);
+		}
+	}
+
+	@Override
+	public void updateNameProduct(int id, String newName) {
+		PreparedStatement st = null;
+         try {
+			st = conn.prepareStatement(
+					"UPDATE PRODUCT SET NOME = ? WHERE ID = ?;");
+			st.setString(1, newName);
+			st.setInt(2, id);
+			st.executeUpdate();
+			System.out.println("PRODUTO ATUALIZADO!");
+		}
+		catch(SQLException e) {
+			throw new DbException("Error update!");
+		}
+		finally {
+			DB.closeStatement(st);
+		}
+	}
+
+	@Override
+	public void updatePriceProduct(int id, Double newPrice) {
+		PreparedStatement st = null;
+        try {
+			st = conn.prepareStatement(
+					"UPDATE PRODUCT SET PRICE = ? WHERE ID = ?;");
+			st.setDouble(1, newPrice);
+			st.setInt(2, id);
+			st.executeUpdate();
+			System.out.println("PRODUTO ATUALIZADO!");
+		}
+		catch(SQLException e) {
+			throw new DbException("Error update!");
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 }
