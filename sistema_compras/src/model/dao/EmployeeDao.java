@@ -6,8 +6,8 @@ import model.entities.Employee;
 
 public interface EmployeeDao {
 
-	void insert(Employee obj);
-	void update(Employee obj);
+	void insert(List<Employee> emp, Employee emp2);
+	void update(Integer ID, Double newSalary);
 	void deleteById(Integer id);
 	Employee findByAccount(String email, String password);
 	List<Employee> findAll();

@@ -12,6 +12,7 @@ import db.DbException;
 import model.dao.EmployeeDao;
 import model.entities.Account;
 import model.entities.Employee;
+import model.entities.LoginException;
 
 public class EmployeeDaoJDBC implements EmployeeDao {
 
@@ -22,21 +23,69 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 	}
 	
 	@Override
-	public void insert(Employee obj) {
-		// TODO Auto-generated method stub
-		
+	public void insert(List<Employee> emp, Employee emp2) {
+		PreparedStatement st = null;
+		try {
+			for(Employee u: emp) {
+				if(u.getAccount().getEmail().equalsIgnoreCase(emp2.getAccount().getEmail())) {
+					throw new LoginException("Email existente!");
+				} 
+			}
+			conn = DB.getConnection();
+			st = conn.prepareStatement("INSERT INTO EMPLOYEE (NOME, EMAIL, SENHA, SALARY, CARGO) VALUES (?, ?, ?, ?, ?);");
+
+			st.setString(1, emp2.getName());
+			st.setString(2, emp2.getAccount().getEmail());
+			st.setString(3, emp2.getAccount().getPassword());
+            st.setDouble(4, emp2.getSalary());
+            st.setString(5, emp2.getCargo());
+			
+			st.executeUpdate();
+			System.out.println("CADASTRADO!");
+		} 
+		catch(LoginException e) {
+			System.err.println(e.getMessage());
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
-	public void update(Employee obj) {
-		// TODO Auto-generated method stub
-		
+	public void update(Integer ID, Double newSalary) {
+		PreparedStatement st = null;
+				
+		try {
+			st = conn.prepareStatement("UPDATE EMPLOYEE SET SALARY = ? WHERE ID = ?;");
+			st.setDouble(1, newSalary);
+			st.setInt(2, ID);
+			st.executeUpdate();
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement("DELETE FROM EMPLOYEE WHERE ID = ?;");
+			st.setInt(1, id);
+			st.executeUpdate();
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
@@ -65,29 +114,12 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 		}
 	}
 
-	private Account instantiateAccount(ResultSet rs) throws SQLException {
-		Account account = new Account();
-		account.setEmail(rs.getString("EMAIL"));
-		account.setPassword(rs.getString("SENHA"));
-		return account;
-	}
-
-	private Employee instantiateEmployee(ResultSet rs, Account account) throws SQLException {
-		Employee emp = new Employee();
-		emp.setName(rs.getString("NOME"));
-		emp.setID(rs.getInt("ID"));
-		emp.setCargo(rs.getString("CARGO"));
-		emp.setSalary(rs.getDouble("SALARY"));
-		emp.setAccount(account);
-		return emp;
-	}
-
 	@Override
 	public List<Employee> findAll() {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT * FROM EMPLOYEE;");
+			st = conn.prepareStatement("SELECT * FROM EMPLOYEE ORDER BY NOME;");
 			rs = st.executeQuery();
 			List<Employee> employee = new ArrayList<>();
 			
@@ -105,5 +137,22 @@ public class EmployeeDaoJDBC implements EmployeeDao {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
+	}
+	
+	private Account instantiateAccount(ResultSet rs) throws SQLException {
+		Account account = new Account();
+		account.setEmail(rs.getString("EMAIL"));
+		account.setPassword(rs.getString("SENHA"));
+		return account;
+	}
+
+	private Employee instantiateEmployee(ResultSet rs, Account account) throws SQLException {
+		Employee emp = new Employee();
+		emp.setName(rs.getString("NOME"));
+		emp.setID(rs.getInt("ID"));
+		emp.setCargo(rs.getString("CARGO"));
+		emp.setSalary(rs.getDouble("SALARY"));
+		emp.setAccount(account);
+		return emp;
 	}
 }

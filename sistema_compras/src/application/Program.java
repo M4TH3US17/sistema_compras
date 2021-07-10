@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -25,28 +26,28 @@ public class Program {
 
 		Locale.setDefault(Locale.US);
 		Scanner scan = new Scanner(System.in);
-		
+
 		System.err.println("### ACESSAR CONTA ###");
 		EmployeeDao employeeDao = DaoFactory.createEmployeeDao();
 		List<Employee> employees = employeeDao.findAll();
 		ProductDao productDao = DaoFactory.createProductDao();
 		List<Product> products = productDao.findAll();
-		
+
 		int op;
 		double value;
-				
+
 		try {
 			System.out.print("Email: ");
 			String email = scan.nextLine();
 			System.out.print("Senha: ");
 			String password = scan.nextLine();
-			
+
 			Employee employee_ = employeeDao.findByAccount(email, password);
-			
+
 			if(employee_ == null) {
 				throw new NullPointerException("Email ou senha inexistente!");
 			}
-			
+
 			System.err.println("\n### TELA INICIAL ###");
 			if(employee_.getCargo().equalsIgnoreCase("gerente")) {
 				System.out.println("FUNCIONÁRIO: " + employee_.getName()+". CARGO: " + employee_.getCargo());
@@ -62,7 +63,7 @@ public class Program {
 				switch(op) {
 				case 1:
 					System.err.println("\n### TABELA DE PREÇOS ###");
-					Product.readTablePrices(products);
+					Product.filterMenuByType();
 					break;
 				case 2:
 					System.out.print("Produto: ");
@@ -77,10 +78,11 @@ public class Program {
 				case 3: 
 					System.out.print("Produto a ser deletado: ");
 					String name_ = scan.nextLine();
-					List<Product> p1 = products.stream().
-							filter(x -> x.getName().equalsIgnoreCase(name_)).
-							collect(Collectors.toList());
-					productDao.deleteById(p1.get(0).getID());
+					Optional<Product> p1 = products.stream()
+							.filter(x -> x.getName().equalsIgnoreCase(name_))
+							.findFirst();
+					
+					productDao.deleteById(p1.get().getID());
 					break;
 				case 4:
 					System.err.println("\n### ALTERAR PRODUTO ###");
@@ -96,19 +98,21 @@ public class Program {
 						String oldName = scan.nextLine();
 						System.out.print("Novo nome: ");
 						String newName = scan.nextLine();
-						List<Product> p2 = products.stream().
-								filter(x -> x.getName().equalsIgnoreCase(oldName)).
-								collect(Collectors.toList());
-						productDao.updateNameProduct(p2.get(0).getID(), newName);
+						Optional<Product> p2 = products.stream()
+								.filter(x -> x.getName().equalsIgnoreCase(oldName))
+								.findFirst();
+						
+						productDao.updateNameProduct(p2.get().getID(), newName);
 					} else if (op == 2) {
 						System.out.print("Produto a ser alterado: ");
 						String nameUpdate = scan.nextLine();
 						System.out.print("Novo preço: R$ ");
 						Double newPrice = scan.nextDouble();
-						List<Product> p2 = products.stream().
-								filter(x -> x.getName().equalsIgnoreCase(nameUpdate)).
-								collect(Collectors.toList());
-						productDao.updatePriceProduct(p2.get(0).getID(), newPrice);
+						Optional<Product> p2 = products.stream().
+								filter(x -> x.getName().equalsIgnoreCase(nameUpdate))
+								.findFirst();
+						
+						productDao.updatePriceProduct(p2.get().getID(), newPrice);
 					} else {
 						System.err.println("Opção inválida!");
 					}
@@ -138,34 +142,32 @@ public class Program {
 						System.out.print("Cargo: ");
 						String cargo = scan.nextLine();
 
-						Account.createAccount(employees, email_, password_, emp, salary, cargo);
+						employeeDao.insert(employees, new Employee(null, emp, new Account(email_, password_), salary, cargo));
 					} else if(op == 2) {
 						System.err.println("-> ATUALIZAR SALÁRIO ");
 						System.out.print("\nFuncionário: ");
 						String emp = scan.nextLine();
 						System.out.print("Salário: ");
 						Double salary = scan.nextDouble();
-
-						List<Employee> emp2 = employees.stream()
+						Optional<Employee> emp2 = employees.stream()
 								.filter(x -> x.getName().equalsIgnoreCase(emp))
-								.collect(Collectors.toList());
+								.findFirst();
 
-						Employee.updateEmployee(emp2.get(0).getID(), salary);
+						employeeDao.update(emp2.get().getID(), salary);
 						System.out.println("SALARIO ALTERADO");
 					} else if(op == 3) {
 						System.err.println("-> DELETAR FUNCIONÁRIO ");
 						System.out.print("\nFuncionário: ");
 						String emp = scan.nextLine();
-						
-						List<Employee> emp2 = employees.stream()
+						Optional<Employee> emp2 = employees.stream()
 								.filter(x -> x.getName().equalsIgnoreCase(emp))
-								.collect(Collectors.toList());
-						
-						System.out.print("\nDigite CONFIRMAR para deletar "+emp2.get(0).getName()+": ");
+								.findFirst();
+
+						System.out.print("\nDigite CONFIRMAR para deletar "+emp2.get().getName()+": ");
 						String conf = scan.nextLine();
-						
+
 						if(conf.equals("CONFIRMAR")) {
-							Employee.deleteEmployee(emp2.get(0).getID());
+							employeeDao.deleteById(emp2.get().getID());
 							System.out.println("FUNCIONÁRIO DELETADO!");
 						} else {
 							System.out.println("CANCELADO.");
@@ -173,7 +175,7 @@ public class Program {
 					} else if(op == 4) {
 						System.err.println("FUNCIONÁRIOS: ");
 						employees.forEach(x -> System.out.println("-> " + x.getName()+" ("+x.getCargo().toLowerCase()+")"+", salário: R$ " +
-						String.format("%.2f", x.getSalary())+";"));
+								String.format("%.2f", x.getSalary())+";"));
 						System.out.println();
 						System.out.println("TOTAL: R$ " + String.format("%.2f", Employee.payroll(employees)));
 					}else {
@@ -192,11 +194,11 @@ public class Program {
 				System.out.print("\nOpção (Digite): ");
 				op = scan.nextInt();
 				scan.nextLine();
-				
+
 				switch(op) {
 				case 1:
 					System.err.println("\n### TABELA DE PREÇOS ###");
-					Product.readTablePrices(products);
+					Product.filterMenuByType();
 					break;
 				case 2:
 					System.err.println("\n### ADICIONAR COMPRA ###");
@@ -207,7 +209,7 @@ public class Program {
 						System.out.print("\nProduto: ");
 						String product_ = scan.nextLine();
 						List<Product> p = products.stream()
-						        .filter(x -> x.getName().equalsIgnoreCase(product_))
+								.filter(x -> x.getName().equalsIgnoreCase(product_))
 								.collect(Collectors.toList());
 						if(p.isEmpty() == true) {
 							System.err.println("Produto inexistente.\n");
@@ -231,7 +233,7 @@ public class Program {
 					do {
 						System.out.println("\nTotal: R$ " + String.format("%.2f", PaymentService.totalPayment(shopping)));
 						System.out.print("Valor: ");
-					    value = scan.nextDouble();
+						value = scan.nextDouble();
 
 						if(PaymentService.totalPayment(shopping) > value) {
 							System.err.println("Valor baixo!\n");

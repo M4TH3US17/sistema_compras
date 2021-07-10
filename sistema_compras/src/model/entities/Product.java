@@ -3,6 +3,9 @@ package model.entities;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import model.dao.DaoFactory;
+import model.dao.ProductDao;
+
 public class Product {
 
 	private String name;
@@ -63,7 +66,9 @@ public class Product {
 		System.out.println(name+", preço: R$ " + String.format("%.2f", price)+", quantidade: "+getQuantity()+";");
 	}
 
-	public static void readTablePrices(List<Product> products) {
+	public static void filterMenuByType() {
+		ProductDao productDao = DaoFactory.createProductDao();
+		List<Product> products = productDao.findAll();
 		System.out.println();
 		System.out.println("-> BEBIDAS: ");
 		List<Product> p1 = products.stream().filter(x -> x.getType().equalsIgnoreCase("bebida")).collect(Collectors.toList());

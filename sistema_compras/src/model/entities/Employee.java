@@ -1,11 +1,6 @@
 package model.entities;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
-
-import db.DB;
 
 public class Employee {
 
@@ -66,47 +61,8 @@ public class Employee {
 	public void setAccount(Account account) {
 		this.account = account;
 	}
-	
-	public static void updateEmployee(int ID, Double newSalary) {
-		Connection conn = null;
-		PreparedStatement st = null;
-				
-		try {
-			conn = DB.getConnection();
-			st = conn.prepareStatement("UPDATE EMPLOYEE SET SALARY = ? WHERE ID = ?;");
-			st.setDouble(1, newSalary);
-			st.setInt(2, ID);
-			st.executeUpdate();
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-		finally {
-			DB.closeStatement(st);
-			DB.closeConnection();
-		}
-	}
 
-	public static void deleteEmployee(int ID) {
-		Connection conn = null;
-		PreparedStatement st = null;
-				
-		try {
-			conn = DB.getConnection();
-			st = conn.prepareStatement("DELETE FROM EMPLOYEE WHERE ID = ?;");
-			st.setInt(1, ID);
-			st.executeUpdate();
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-		finally {
-			DB.closeStatement(st);
-			DB.closeConnection();
-		}
-	}
-
-	public static Double payroll(List<Employee> employees) {
+    public static Double payroll(List<Employee> employees) {
 		Double total = 0.0;
 		for(Employee emp: employees) {
 			total += emp.getSalary();

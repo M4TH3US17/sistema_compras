@@ -6,16 +6,17 @@ import model.entities.Product;
 
 public class PaymentService implements Payment {
 
-	private List<Product> products;
 	private Product product;
 	private Double payment;
 	private Double payment2;
-	
+
+	private List<Product> products;
+
 	public PaymentService(List<Product> products, Double payment) {
 		this.products = products;
 		this.payment2 = payment;
 	}
-	
+
 	public Double getPayment2() {
 		return payment2;
 	}
@@ -45,13 +46,6 @@ public class PaymentService implements Payment {
 	}
 
 	@Override
-	public String toString() {
-		return "Total: R$ " + String.format("%.2f", calcTotal())
-				+"\nPagamento: R$ " + String.format("%.2f", payment2)
-				+"\nTroco: R$ " + String.format("%.2f", calcChange());
-	}
-
-	@Override
 	public Double calcTotal() {
 		Double sum = 0.0;
 		for(Product p: products) {
@@ -66,14 +60,14 @@ public class PaymentService implements Payment {
 		Double change = 0.0;
 		total = calcTotal();
 		change = payment2 - total;
-		
+
 		if(change < 0) {
 			return 0.0;
 		} else {
 			return change;	
 		}
 	}
-	
+
 	public static Double totalPayment(List<Product> products) {
 		Double sum = 0.0;
 		for(Product p: products) {
@@ -81,5 +75,11 @@ public class PaymentService implements Payment {
 		}
 		return sum;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "Total: R$ " + String.format("%.2f", calcTotal())
+		+"\nPagamento: R$ " + String.format("%.2f", payment2)
+		+"\nTroco: R$ " + String.format("%.2f", calcChange());
+	}	
 }

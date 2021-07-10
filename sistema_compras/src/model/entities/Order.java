@@ -10,7 +10,7 @@ import model.services.OrderService;
 public class Order {
 
 	private  Date date;
-	private OrderService order;
+	private OrderService orderService;
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 	private List<Product> products = new ArrayList<>();
@@ -18,18 +18,18 @@ public class Order {
 	public Order() {
 	}
 	
-	public Order(List<Product> product, Date date, OrderService order) {
+	public Order(List<Product> product, Date date, OrderService orderService) {
 		this.products = product;
 		this.date = date;
-		this.order = order;
+		this.orderService = orderService;
 	}
 	
-	public OrderService getOrder() {
-		return order;
+	public OrderService getOrderService() {
+		return orderService;
 	}
 
-	public void setOrder(OrderService order) {
-		this.order = order;
+	public void setOrder(OrderService orderService) {
+		this.orderService = orderService;
 	}
 
 	public Date getDate() {
@@ -51,6 +51,6 @@ public class Order {
 		System.out.println("\nDATA: " + sdf.format(date)
 			+"\nCOMPRA: ");
 		products.forEach(x -> x.readProducts());
-	    System.out.println(order.toString());
+	    System.out.println(orderService.toString());
 	}	
 }
